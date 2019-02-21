@@ -7,7 +7,7 @@ jukeboxClient.on('ready', () => {
 	console.log(`Connected as ${jukeboxClient.user.tag}`);
 });
 
-discordClient.on('message', (recMeg) => {
+jukeboxClient.on('message', (recMeg) => {
 	if (recMeg.author == jukeboxClient.user) { return; }
 
 	if (recMeg.content.includes(jukeboxClient.user.toString())) {
