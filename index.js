@@ -10,7 +10,7 @@ jukeboxClient.on('ready', () => {
 jukeboxClient.on('message', (recMeg) => {
 	if (recMeg.author == jukeboxClient.user) { return; }
 
-	if (recMeg.content.includes(jukeboxClient.user.toString())) {
+	if (recMeg.content.includes(jukeboxClient.user.toString()) && recMeg.content.startsWith('!')) {
 		try {
 			processCommand(recMeg);
 		} catch (error) {
