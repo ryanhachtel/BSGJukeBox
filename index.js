@@ -6,6 +6,16 @@ const bot_token = 'NTQ4MDA5NTg4OTQzODgwMjE0.D0_FrQ.okm77_W6fVYgz4qDO_vGm2tFeYg';
 let currentChannel = null;
 let currentSong = null;
 
+/*
+Todo's:
+	Song queue
+	Add to queue
+	Remove
+	Skip Song
+	Hype Music
+	Playlists
+*/
+
 jukeboxClient.on('ready', () => {
 	console.log(`Connected as ${jukeboxClient.user.tag}`);
 });
@@ -13,7 +23,10 @@ jukeboxClient.on('ready', () => {
 jukeboxClient.on('message', (recMeg) => {
 	if (recMeg.author == jukeboxClient.user) { return; }
 
-	if (recMeg.content.includes(jukeboxClient.user.toString()) && recMeg.content.startsWith('!')) {
+	if (
+		recMeg.content.includes(jukeboxClient.user.toString())
+		&& recMeg.content.startsWith('!')
+	) {
 		try {
 			processCommand(recMeg);
 		} catch (error) {
@@ -45,8 +58,9 @@ const processCommand = (cmd) => {
 }
 
 const playMusic = (cmd, link) => {
-	if (cmd.member.voiceChannel) {
+	if (cmd.member.voiceChannel && !currentSong) {
 		currentChannel = cmd.member.voiceChannel;
+		// Join and begin playing
 		cmd.member.voiceChannel.join()
 		.then(conn => {
 			const broadcast = jukeboxClient.createVoiceBroadcast();
@@ -54,7 +68,10 @@ const playMusic = (cmd, link) => {
 			broadcast.playStream(stream);
 			const voiceBroadcast = conn.playBroadcast(broadcast);
 			currentSong = voiceBroadcast;
-			voiceBroadcast.on('end', () => {
+
+			// Listen for song to finish
+			broadcast.on('end', () => {
+				console.log('Song completed.');
 				currentChannel = null;
 				currentSong = null;
 				cmd.member.voiceChannel.leave();
