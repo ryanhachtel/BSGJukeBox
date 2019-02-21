@@ -8,9 +8,9 @@ jukeboxClient.on('ready', () => {
 });
 
 discordClient.on('message', (recMeg) => {
-	if (recMeg.author == discordClient.user) { return; }
+	if (recMeg.author == jukeboxClient.user) { return; }
 
-	if (recMeg.content.includes(discordClient.user.toString())) {
+	if (recMeg.content.includes(jukeboxClient.user.toString())) {
 		try {
 			processCommand(recMeg);
 		} catch (error) {
@@ -37,7 +37,7 @@ const playMusic = (cmd, link) => {
 	if (cmd.member.voiceChannel) {
 		cmd.member.voiceChannel.join()
 		.then(conn => {
-			const broadcast = client.createVoiceBroadcast();
+			const broadcast = jukeboxClient.createVoiceBroadcast();
 			const stream = ytdl(link, { filter : 'audioonly' });
 			broadcast.playStream(stream);
 			const dispatcher = conn.playBroadcast(broadcast);
