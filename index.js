@@ -2,18 +2,21 @@ const ytdl = require('ytdl-core');
 const Discord = require('discord.js');
 const jukeboxClient = new Discord.Client();
 const bot_token = 'NTQ4MDA5NTg4OTQzODgwMjE0.D0_FrQ.okm77_W6fVYgz4qDO_vGm2tFeYg';
+const streamOptions = { seek: 0, volumne: 1 };
 
 let currentChannel = null;
-let currentSong = null;
+let currentStream = null;
+let songQueue = [];
 
 /*
 Todo's:
-	Song queue
-	Add to queue
 	Remove
-	Skip Song
+	List Queue
+		- links
+		- v2 song names
 	Hype Music
 	Playlists
+	Check Link is for Youtube
 */
 
 jukeboxClient.on('ready', () => {
@@ -49,8 +52,16 @@ const processCommand = (cmd) => {
 			pause(cmd);
 			break;
 		case 'resume':
-			console.log("Resuming song");
+			console.log('Resuming song');
 			resume(cmd);
+			break;
+		case 'queue':
+			console.log('Queueing up song');
+			queueSong(cmdArgs[1])
+			break;
+		case 'skip':
+			console.log('Skipping current song.')
+			skipSong(cmd);
 			break;
 		default:
 			break;
@@ -58,40 +69,75 @@ const processCommand = (cmd) => {
 }
 
 const playMusic = (cmd, link) => {
-	if (cmd.member.voiceChannel && !currentSong) {
+	if (!cmd.member.voiceChannel) {
+		cmd.reply("You must be in a voice channel to play a song.");
+		return;
+	}
+	if (!currentStream) {
 		currentChannel = cmd.member.voiceChannel;
 		// Join and begin playing
 		cmd.member.voiceChannel.join()
 		.then(conn => {
-			const broadcast = jukeboxClient.createVoiceBroadcast();
-			const stream = ytdl(link, { filter : 'audioonly' });
-			broadcast.playStream(stream);
-			const voiceBroadcast = conn.playBroadcast(broadcast);
-			currentSong = voiceBroadcast;
-
-			// Listen for song to finish
-			broadcast.on('end', () => {
-				console.log('Song completed.');
-				currentChannel = null;
-				currentSong = null;
-				cmd.member.voiceChannel.leave();
-			});
+			createStreamDispatcherAndPlay(conn, cmd, link);
 		})
 		.catch(err => console.log(err));
 	} else {
-		cmd.reply('You must be in a voice channel to play a song')
+		cmd.reply('Already Playing a song, try !queue to queue up your request.');
 	}
 }
 
-const pause = (cmd) => {
-	if (currentSong == null) {
-		cmd.reply("No song is currently playing");
+const createStreamDispatcherAndPlay = (conn, cmd, link) => {
+	let stream = ytdl(link, { filter : 'audioonly' });
+	const streamDispatcher = conn.playStream(stream, streamOptions);
+	currentStream = streamDispatcher;
+
+	// Listen for song to finish
+	streamDispatcher.on('end', () => {
+		console.log("Current Song stopped playing");
+		if (songQueue.length !== 0) {
+			const newSong = songQueue[0];
+			songQueue = songQueue.slice(1);
+			createStreamDispatcherAndPlay(conn, cmd, newSong)
+		} else {
+			currentChannel = null;
+			currentStream = null;
+			streamDispatcher.stream.destroy();
+			cmd.member.voiceChannel.leave();
+		}
+	})
+}
+
+const queueSong = (link) => {
+	songQueue.push(link);
+}
+
+const skipSong = (cmd) => {
+	if (currentStream == null) {
+		cmd.reply("No song is currently playing, can't skip it.");
 		return;
 	}
 
 	if (cmd.member.voiceChannel) {
 		if (cmd.member.voiceChannel === currentChannel) {
-			currentSong.pause();
+			currentStream.end();
+			return;
+		} else {
+			cmd.reply("You are not a part of the channel listening to the song and can't skip it.");
+			return;
+		}
+	}
+}
+
+const pause = (cmd) => {
+	if (currentStream == null) {
+		cmd.reply("No song is currently playing, can't pause it.");
+		return;
+	}
+
+	if (cmd.member.voiceChannel) {
+		if (cmd.member.voiceChannel === currentChannel) {
+			currentStream.pause();
+			return;
 		} else {
 			cmd.reply("You are not a part of the channel listening to the song and can't pause it.");
 			return;
@@ -100,14 +146,15 @@ const pause = (cmd) => {
 }
 
 const resume = (cmd) => {
-	if (currentSong == null) {
-		cmd.reply("No song is currently playing");
+	if (currentStream == null) {
+		cmd.reply("No song is currently paused, can't resume it.");
 		return;
 	}
 
 	if (cmd.member.voiceChannel) {
 		if (cmd.member.voiceChannel === currentChannel) {
-			currentSong.resume();
+			currentStream.resume();
+			return;
 		} else {
 			cmd.reply("You are not a part of the channel listening to the song and can't resume it.");
 			return;
