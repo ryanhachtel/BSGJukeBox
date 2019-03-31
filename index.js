@@ -1,7 +1,7 @@
+const bot_token = require('./token');
 const ytdl = require('ytdl-core');
 const Discord = require('discord.js');
 const jukeboxClient = new Discord.Client();
-const bot_token = 'NTQ4MDA5NTg4OTQzODgwMjE0.D0_FrQ.okm77_W6fVYgz4qDO_vGm2tFeYg';
 const streamOptions = { seek: 0, volumne: 1 };
 
 let currentChannel = null;

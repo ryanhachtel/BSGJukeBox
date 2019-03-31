@@ -1,18 +1,17 @@
 {
-  "name": "musicbot",
-  "version": "0.1.0",
-  "description": "music playing discord bot",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
-  },
-  "author": "Ryan Hachtel",
-  "license": "MIT",
-  "dependencies": {
-    "discord.js": "^11.4.2",
-    "ffmpeg-binaries": "^4.0.0",
-    "node-opus": "^0.3.1",
-    "ytdl-core": "^0.29.1"
-  }
+	"name": "musicbot",
+	"version": "1.0.0",
+	"description": "music playing discord bot",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"author": "Ryan Hachtel",
+	"license": "MIT",
+	"dependencies": {
+		"discord.js": "^11.4.2",
+		"ffmpeg-binaries": "^4.0.0",
+		"node-opus": "^0.3.1",
+		"ytdl-core": "^0.29.1"
+	}
 }
