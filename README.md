@@ -19,4 +19,4 @@
 * Skip current song: `!skip`
 
 
-### Based of this [guide](https://www.devdungeon.com/content/javascript-discord-bot-tutorial) to get started
+### Based off this [guide](https://www.devdungeon.com/content/javascript-discord-bot-tutorial) to get started
